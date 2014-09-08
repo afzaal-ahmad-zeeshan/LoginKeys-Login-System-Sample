@@ -1,0 +1,66 @@
+﻿@using LoginKeys;
+
+@{
+    Layout = "~/_SiteLayout.cshtml";
+    
+    // Throws an exception if there is some error in the user logged in
+    FileLogin.RequireLoggedIn();
+
+    Page.Title = FileLogin.MyEmail() + "'s Profile Page";
+    //Layout = "Your Layout Page goes here";
+    string result = "Didn't change!";
+
+    if (IsPost)
+    {
+        // Request was made, test the CODE
+        string password = Request.Form["password"];
+        string oldPassword = Request.Form["oldPass"];
+        if (FileLogin.ChangePassword(Convert.ToInt16(FileLogin.MyUserId()), oldPassword, password))
+        {
+            result = "Changed";
+        }
+    }
+}
+
+
+<ul>
+    <li><a href="~/userprofile/changepassword">Change Password</a></li>
+</ul>
+
+<div class="constant-fields">
+    @if (FileLogin.IsLoggedIn())
+    {
+        // Usage of the IsLoggedIn() function.
+        <div>You're logged in currently.</div>
+    }
+    <div>My UserID: @FileLogin.MyUserId()</div>
+    <div>My Email address is: @FileLogin.MyEmail()</div>
+    <div>Password Status: @result</div>
+    <div>Password reset token: @Account.GetPasswordResetToken(1)</div>
+</div>
+
+<div>
+    @if (UrlData[0] == "changepassword")
+    {
+        <form method="post">
+            Old Password <br />
+            <input type="password" name="oldPass" /><br />
+            New Password <br />
+            <input type="password" name="password" /><br />
+            <input type="submit" value="Submit" />
+        </form>
+    }
+    else if (UrlData[0] == "deleteme")
+    {
+        if (Account.RemoveMembership(Convert.ToInt16(FileLogin.MyUserId())))
+        {
+            // Create a redirect!
+            Response.Redirect("~/");
+        }
+    }
+</div>
+
+<div>
+    <h3>Account Details</h3>
+    <a href="~/userprofile/deleteme">Delete Profile</a>
+</div>
